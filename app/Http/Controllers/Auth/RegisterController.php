@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\User;
+use App\SocialProvider;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
-
+use Socialite;
 class RegisterController extends Controller
 {
     /*
@@ -86,4 +87,53 @@ class RegisterController extends Controller
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
     }
+
+
+    /**
+     * Redirect the user to the {$provider} authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToProvider($provider)
+    {
+         return Socialite::driver($provider)->redirect();
+    }
+
+    /**
+     * Obtain the user information from {$provider}.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handleProviderCallback($provider)
+    {
+       
+
+        try{
+
+            $socialuser = Socialite::driver($provider)->user();
+            $socialProvider=SocialProvider::where('provider_id',$socialuser->getId());
+            if($socialProvider){
+                $user=User::firstOrCreate(
+                    ['email'=>$socialuser->getEmail()],
+                    ['name'=>$socialuser->getName()]);
+                $user->socialProviders()->create(
+                    ['provider_id'=> $socialuser->getId(), 'provider'=>$provider]);
+                        }
+                    else {
+                         $user=$socialProvider->user;
+                         auth()->login($user);
+                         return redirect('/');
+                                 }
+
+        }
+        catch(\Exception $e)
+            {
+                return redirect('/');
+                    }
+        
+                   
+
+    }
+
+
 }
