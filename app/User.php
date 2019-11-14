@@ -11,7 +11,6 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Http\Controllers\Role;
 use Illuminate\Notifications\Notifiable;
 use App\Models\StudentDetail;
-
 class User extends Authenticatable
 {
     use CrudTrait;
@@ -213,6 +212,11 @@ class User extends Authenticatable
                 'admin_id' => $this->id
             ]);
         }
+    }
+    // realtion for social provider
+    public function socialProviders(Type $var = null)
+    {
+        return $this->hasMany(socialProvider::class);
     }
 
 }
