@@ -45,3 +45,6 @@ Route::group([    'prefix' => 'student',
     Route::get('{categories}/{slug}', 'ArticleController@show')->where('categories','^[a-zA-Z0-9-_\/]+$')->name('post'); //single category route
 
 });
+// for login social media
+Route::get('auth/{provider}', 'Auth\RegisterController@redirectToProvider');
+Route::get('auth/{provider}/callback', 'Auth\RegisterController@handleProviderCallback');
